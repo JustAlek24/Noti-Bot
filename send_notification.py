@@ -168,6 +168,8 @@ def main():
         message = format_issue_notification(repo_name, actor, title, commit_url, action)
     elif event_type == 'deadline':
         message = format_deadline_notification(repo_name, deadline_info)
+    elif event_type == 'branch_created':
+        message = format_branch_created_notification(repo_name, actor, commit_message)
     else:
         # Общее уведомление
         message = f"""
