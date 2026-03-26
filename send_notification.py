@@ -156,7 +156,7 @@ def main():
     
     # Форматируем сообщение в зависимости от типа события
     if event_type == 'push':
-        message = format_push_notification(repo_name, actor, commit_message, commit_url)
+        message = format_push_notification(repo_name, branch, actor, commit_message, commit_url)
     elif event_type == 'pr_opened':
         message = format_pr_opened_notification(repo_name, actor, commit_message, commit_url)
     elif event_type == 'pr_merged':
