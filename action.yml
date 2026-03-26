@@ -14,6 +14,9 @@ inputs:
   repo_name:
     description: 'Название репозитория'
     required: true
+  branch:
+    description: 'Название ветки'
+    required: false
   actor:
     description: 'Автор действия'
     required: true
@@ -49,6 +52,7 @@ runs:
         TELEGRAM_CHAT_ID: ${{ inputs.telegram_chat_id }}
         EVENT_TYPE: ${{ inputs.event_type }}
         REPO_NAME: ${{ inputs.repo_name }}
+        BRANCH: ${{ inputs.branch }}
         ACTOR: ${{ inputs.actor }}
         COMMIT_MESSAGE: ${{ inputs.commit_message }}
         COMMIT_URL: ${{ inputs.commit_url }}
