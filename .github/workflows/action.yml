@@ -1,0 +1,149 @@
+name: Уведомления
+
+on:
+  push:
+  create:
+  pull_request:
+    types: [opened, closed]
+  issues:
+    types: [opened, closed]
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      # Push
+      - name: Push
+        if: github.event_name == 'push'
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JustAlek24/Noti-Bot/dispatches \
+            -d '{
+              "event_type": "send",
+              "client_payload": {
+                "event_type": "push",
+                "repo_name": "${{ github.repository }}",
+                "branch": "${{ github.ref_name }}",
+                "actor": "${{ github.actor }}",
+                "commit_message": "${{ github.event.head_commit.message }}",
+                "commit_url": "${{ github.event.head_commit.url }}"
+              }
+            }'
+      
+      # Создание ветки
+      - name: Создание ветки
+        if: github.event_name == 'create' && github.event.ref_type == 'branch'
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JustAlek24/Noti-Bot/dispatches \
+            -d '{
+              "event_type": "send",
+              "client_payload": {
+                "event_type": "branch_created",
+                "repo_name": "${{ github.repository }}",
+                "actor": "${{ github.actor }}",
+                "commit_message": "${{ github.event.ref }}"
+              }
+            }'
+      
+      # Pull Request открыт
+      - name: PR открыт
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JustAlek24/Noti-Bot/dispatches \
+            -d '{
+              "event_type": "send",
+              "client_payload": {
+                "event_type": "pr_opened",
+                "repo_name": "${{ github.repository }}",
+                "actor": "${{ github.event.pull_request.user.login }}",
+                "commit_message": "${{ github.event.pull_request.title }}",
+                "commit_url": "${{ github.event.pull_request.html_url }}"
+              }
+            }'
+      
+      # Pull Request влит
+      - name: Merdge
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JustAlek24/Noti-Bot/dispatches \
+            -d '{
+              "event_type": "send",
+              "client_payload": {
+                "event_type": "pr_merged",
+                "repo_name": "${{ github.repository }}",
+                "actor": "${{ github.event.pull_request.user.login }}",
+                "commit_message": "${{ github.event.pull_request.title }}",
+                "commit_url": "${{ github.event.pull_request.html_url }}"
+              }
+            }'
+      
+      # Issue
+      - name: Issue
+        if: github.event_name == 'issues'
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/JustAlek24/Noti-Bot/dispatches \
+            -d '{
+              "event_type": "send",
+              "client_payload": {
+                "event_type": "issue",
+                "repo_name": "${{ github.repository }}",
+                "actor": "${{ github.event.issue.user.login }}",
+                "commit_message": "${{ github.event.action }}|${{ github.event.issue.title }}",
+                "commit_url": "${{ github.event.issue.html_url }}"
+              }
+            }'
+      
+      # Дедлайны (Milestones)
+      - name: Дедлайны
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MILESTONES=$(curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/JustAlek24/kazakVRN/milestones?state=open")
+          
+          echo "$MILESTONES" | jq -c '.[] | select(.due_on != null)' | while read ms; do
+            TITLE=$(echo "$ms" | jq -r '.title')
+            URL=$(echo "$ms" | jq -r '.html_url')
+            DUE=$(echo "$ms" | jq -r '.due_on')
+            DUE_SEC=$(date -d "$DUE" +%s)
+            NOW_SEC=$(date +%s)
+            DAYS_LEFT=$(( ($DUE_SEC - $NOW_SEC) / 86400 ))
+            
+            if [ $DAYS_LEFT -le 3 ] && [ $DAYS_LEFT -ge 0 ]; then
+              curl -X POST \
+                -H "Authorization: token ${{ secrets.GH_PAT }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/JustAlek24/Noti-Bot/dispatches \
+                -d "{
+                  \"event_type\": \"send\",
+                  \"client_payload\": {
+                    \"event_type\": \"deadline\",
+                    \"repo_name\": \"${{ github.repository }}\",
+                    \"deadline_info\": {
+                      \"title\": \"$TITLE\",
+                      \"url\": \"$URL\",
+                      \"deadline\": \"${DUE:0:10}\",
+                      \"days_left\": $DAYS_LEFT
+                    }
+                  }
+                }"
+            fi
+          done
