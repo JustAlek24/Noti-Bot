@@ -75,9 +75,9 @@ def format_issue_notification(repo, actor, title, url, action='opened'):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     action_map = {
-        'opened': ('🟡', 'Открыт'),
-        'closed': ('🔴', 'Закрыт'),
-        'reopened': ('🔄', 'Переоткрыт')
+        'opened': ('🟡', 'открыта'),
+        'closed': ('🔴', 'закрыта'),
+        'reopened': ('🔄', 'возобновлена')
     }
     emoji, action_text = action_map.get(action, ('📝', action.capitalize()))
     
@@ -175,20 +175,20 @@ def main():
     else:
         # Общее уведомление
         message = f"""
-📢 <b>GitHub Event: {event_type}</b>
+📢 <b>GitHub событие: {event_type}</b>
 
-📦 <b>Repository:</b> {repo_name}
-👤 <b>Author:</b> {actor}
-📝 <b>Details:</b> {commit_message if commit_message else 'No details'}
+📦 <b>Репозиторий:</b> {repo_name}
+👤 <b>Автор:</b> {actor}
+📝 <b>Детали:</b> {commit_message if commit_message else 'Нет деталей'}
 """
     
     # Отправляем сообщение
     success = send_telegram_message(token, chat_id, message)
     
     if success:
-        print(f"Notification sent successfully for {event_type} in {repo_name}")
+        print(f"Уведомление успешно отправлено для {event_type} в {repo_name}")
     else:
-        print(f"Failed to send notification for {event_type}", file=sys.stderr)
+        print(f"Не удалось отправить уведомление о {event_type}", file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
