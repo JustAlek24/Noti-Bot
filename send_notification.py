@@ -144,6 +144,7 @@ def main():
     chat_id = os.environ.get('TELEGRAM_CHAT_ID')
     event_type = os.environ.get('EVENT_TYPE', 'unknown')
     repo_name = os.environ.get('REPO_NAME', 'Unknown')
+    branch = os.environ.get('BRANCH', '')
     actor = os.environ.get('ACTOR', 'Unknown')
     commit_message = os.environ.get('COMMIT_MESSAGE', '')
     commit_url = os.environ.get('COMMIT_URL', '')
