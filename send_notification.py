@@ -22,6 +22,17 @@ def send_telegram_message(token, chat_id, text, parse_mode='HTML'):
         print(f"Ошибка отправки сообщения в Telegram: {e}", file=sys.stderr)
         return False
 
+def format_branch_created_notification(repo, actor, branch_name):
+    """Форматирует уведомление о создании ветки"""
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    return f"""
+🌿 <b>Новая ветка создана</b> @ {timestamp}
+
+📦 <b>Репозиторий:</b> {repo}
+👤 <b>Автор:</b> {actor}
+🌿 <b>Ветка:</b> {branch_name}
+"""
+
 def format_push_notification(repo, actor, message, url):
     """Формат Push уведомления"""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
