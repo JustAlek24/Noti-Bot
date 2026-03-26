@@ -2,14 +2,8 @@ name: 'Telegram Notifier'
 description: 'Отправляет уведомления в Telegram о событиях в репозиториях GitHub'
 
 inputs:
-  telegram_bot_token:
-    description: 'Telegram Bot Token (от @BotFather)'
-    required: true
-  telegram_chat_id:
-    description: 'Telegram Chat ID (куда отправлять уведомления)'
-    required: true
   event_type:
-    description: 'Тип события (push, pr_opened, pr_merged, issue, deadline)'
+    description: 'Тип события (push, pr_opened, pr_merged, issue, deadline, branch_created)'
     required: true
   repo_name:
     description: 'Название репозитория'
@@ -21,13 +15,13 @@ inputs:
     description: 'Автор действия'
     required: true
   commit_message:
-    description: 'Описание коммита/PR/задачи'
+    description: 'Описание коммита/PR/задачи/ветки'
     required: false
   commit_url:
     description: 'URL коммита/PR/задачи'
     required: false
   deadline_info:
-    description: 'JSON с деталями дедлайна (для уведомлений о дедлайнах)'
+    description: 'JSON с деталями дедлайна'
     required: false
 
 runs:
@@ -48,8 +42,8 @@ runs:
       run: python ${{ github.action_path }}/send_notification.py
       shell: bash
       env:
-        TELEGRAM_BOT_TOKEN: ${{ inputs.telegram_bot_token }}
-        TELEGRAM_CHAT_ID: ${{ inputs.telegram_chat_id }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         EVENT_TYPE: ${{ inputs.event_type }}
         REPO_NAME: ${{ inputs.repo_name }}
         BRANCH: ${{ inputs.branch }}
