@@ -33,13 +33,14 @@ def format_branch_created_notification(repo, actor, branch_name):
 🌿 <b>Ветка:</b> {branch_name}
 """
 
-def format_push_notification(repo, actor, message, url):
+def format_push_notification(repo, branch, actor, message, url):
     """Формат Push уведомления"""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     return f"""
 🔵 <b>Новый Push</b> @ {timestamp}
 
 📦 <b>Репозиторий:</b> {repo}
+🌿 <b>Ветка:</b> {branch}
 👤 <b>Автор:</b> {actor}
 📝 <b>Описание:</b> {message[:200] if message else 'Нет описания'}
 🔗 <b>Ссылка:</b> <a href="{url if url else '#'}">Проверить Commit</a>
